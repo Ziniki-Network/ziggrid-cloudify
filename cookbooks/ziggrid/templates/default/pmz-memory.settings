@@ -1,0 +1,68 @@
+### Default configuration for in-memory mode.
+
+## Standard settings you may need
+
+# Where is Java?
+# export JAVA_HOME=
+
+# If for any reason you need to put something on the front of the classpath
+# (most likely your own configuration files), specific the appropriate CLASSPATH
+# syntax here.  This will be appended to the FRONT of the final classpath.
+# export OVERRIDE_CLASSPATH=
+
+# ZINIKI_ROOT sets the directory to look for the basic Ziniki code libraries
+export ZINIKI_ROOT=root
+
+# CPJARS specifies other directories which contains JARs to add to the classpath.
+# All the jars in each of the directories in this list will be added to the path.
+# This is a standard UNIX-style space-separated list of directories
+export CPJARS=libs
+
+# JARDIRS specifies a list of directories where the JARs for modules to be loaded into the
+# running PMZiniki should be found.
+export JARDIRS=modules
+
+# This is where PMZiniki will look for user application JARs to load 
+export APPLICATIONS=applications
+
+# This is where PMZiniki will look for more privileged code to load
+export BUILTINS=builtins
+export PRIVILEGED=privileged
+
+# These are modules to initialize.  The code must be found in JARs specified
+# by the JARDIRS variable. 
+export MODULE_basic=org.ziniki.modules.login.basic.BasicLoginModule
+export MODULE_openid=org.ziniki.modules.login.openid.OpenIdLoginModule
+export MODULE_developer=org.ziniki.modules.developer.DeveloperModule
+
+## AWS-related options
+
+# On AWS, this file needs to be sent as "user-data" which the pmz.sh script
+# will automatically load.  In order to work on a local machine, it's important
+# to tell the script that we already have the data.
+export HAVE_USER_DATA=true
+
+# AWS will likewise try and mount an EBS volume.  This specifies the name of the
+# volume to mount, with the special value "nomount" disabling this feature.
+export EBS=nomount
+
+# If for some reason, you wish to run this is a different directory to the current directory,
+# specify USE_RUNTIME_DIR.
+# export USE_RUNTIME_DIR=/tmp/ziniki-runtime
+
+## Persistence-related options
+
+# For file backed stores, STORE needs to be set to a directory in which to keep
+# track of the persistent objects.  Turn this off for in-memory mode.
+#export STORE=
+
+# It is also possible to persist to a postgres database.  Specify this string as
+# user:password@uri.  Turn this off for in-memory mode.
+#export DBDRIVER=org.postgresql.Driver
+#export DATABASE="ziniki:@jdbc:postgresql://localhost:5432/ziniki"
+
+# Specifies whether to initialize the store or not.  In memory-only configurations, this should
+# always be set to true (and will be anyway).  In file-backed or database-backed instances, this
+# will clean out and reinitialize that store if set to true, and recover from it if set false.
+export INIT=true
+

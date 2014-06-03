@@ -1,0 +1,15 @@
+name             "ziggrid"
+maintainer       "Eric Diamond"
+maintainer_email "eric@ziniki.org"
+license          "All rights reserved"
+description      "Installs/Configures PMZ"
+long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
+version          "0.8.0"
+
+depends "s3_file",  		"= 2.2.4"
+depends "java", 		"= 1.16.2"
+depends "partial_search", 	"= 1.0.6"
+depends "runit",		"= 1.5.10"
+depends "ziniki-log-agent", 	"= 0.1.0"
+depends "zis-libraries", 	"= 0.1.0"
+depends "foundationdb",		"= 0.2.0"

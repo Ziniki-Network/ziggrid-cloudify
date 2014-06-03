@@ -1,0 +1,1 @@
+default['foundationdb']['config_dir'] = "/etc/foundationdb"
