@@ -2,7 +2,7 @@ default['foundationdb']['user'] = "foundationdb"
 default['foundationdb']['group'] = "foundationdb"
 
 default['foundationdb']['download_base_url'] = "https://foundationdb.com/downloads/I_accept_the_FoundationDB_Community_License_Agreement"
-default['foundationdb']['version'] = "2.0.5"
+default['foundationdb']['version'] = "2.0.7"
 
 default['foundationdb']['server_download_package_name'] = "foundationdb-server-#{node['foundationdb']['version']}-1.x86_64.rpm"
 default['foundationdb']['client_download_package_name'] = "foundationdb-clients-#{node['foundationdb']['version']}-1.x86_64.rpm"
