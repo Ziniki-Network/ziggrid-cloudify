@@ -46,8 +46,8 @@ local_data_file = File.join(Chef::Config[:file_cache_path], node[:ziggrid][:data
 s3_file local_prod_file do
   remote_path File.join(node[:ziggrid][:prod][:prefix], node[:ziggrid][:prod][:filename])
   bucket node[:ziggrid][:prod][:bucket]
-  aws_access_key_id node[:ziggrid][:aws][:access_key]
-  aws_secret_access_key node[:ziggrid][:aws][:secret_key]
+  aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+  aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
   owner node[:ziggrid][:user]
   group node[:ziggrid][:group]
   mode "0755"
@@ -58,8 +58,8 @@ end
 s3_file local_static_file do
   remote_path "/#{node[:ziggrid][:static][:filename]}"
   bucket node[:ziggrid][:static][:bucket]
-  aws_access_key_id node[:ziggrid][:aws][:access_key]
-  aws_secret_access_key node[:ziggrid][:aws][:secret_key]
+  aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+  aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
   owner node[:ziggrid][:user]
   group node[:ziggrid][:group]
   mode "0755"
@@ -70,8 +70,8 @@ end
 s3_file local_data_file do
   remote_path "/#{node[:ziggrid][:data][:filename]}"
   bucket node[:ziggrid][:data][:bucket]
-  aws_access_key_id node[:ziggrid][:aws][:access_key]
-  aws_secret_access_key node[:ziggrid][:aws][:secret_key]
+  aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+  aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
   owner node[:ziggrid][:user]
   group node[:ziggrid][:group]
   mode "0755"
@@ -137,8 +137,8 @@ node[:ziggrid][:config_zip_list].each do |config_zip|
   s3_file config_zip_full_path do
     remote_path "/#{config_zip}"
     bucket node[:ziggrid][:static][:bucket]
-    aws_access_key_id node[:ziggrid][:aws][:access_key]
-    aws_secret_access_key node[:ziggrid][:aws][:secret_key]
+    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
     owner node[:ziggrid][:user]
     group node[:ziggrid][:group]
     mode "0755"
@@ -202,8 +202,8 @@ elsif (node[:ziggrid][:data][:datastore] == "foundationdb")
   s3_file local_config_file do
     remote_path "/#{node[:ziggrid][:prefix]}/#{node[:ziggrid][:role]}.config"
     bucket node[:ziggrid][:bucket]
-    aws_access_key_id node[:ziggrid][:aws][:access_key]
-    aws_secret_access_key node[:ziggrid][:aws][:secret_key]
+    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
     owner node[:ziggrid][:user]
     group node[:ziggrid][:group]
     mode "0755"

@@ -10,8 +10,8 @@ default[:ziggrid][:prod][:bucket] = "ziniki"
 default[:ziggrid][:static][:filename] = "ziggrid_static.zip"
 default[:ziggrid][:static][:bucket] = "ziggrid"
 
-default[:ziggrid][:aws][:access_key] = "your_access_key"
-default[:ziggrid][:aws][:secret_key] = "your_secret_key"
+default[:ziggrid][:cloud][:aws][:access_key] = "your_access_key"
+default[:ziggrid][:cloud][:aws][:secret_key] = "your_secret_key"
 
 default[:ziggrid][:config_zip_list] = ["ziggrid-baseball.zip"]
 default[:ziggrid][:bucket_name] = "ziggrid-baseball"
