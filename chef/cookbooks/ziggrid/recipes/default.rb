@@ -36,47 +36,84 @@ user node[:ziggrid][:user] do
   shell "/bin/bash"
 end
 
+if (node[:ziggrid][:cloud][:aws][:access_key].empty? || node[:ziggrid][:cloud][:aws][:secret_key].empty?)
+  Chef::Log.info "No AWS credentials supplied. Using public release."
+  use_public_release = true
+end
+
+
 # download ziggrid prod file only if it isn't already on the target system
 local_prod_file = File.join(Chef::Config[:file_cache_path], node[:ziggrid][:prod][:filename])
 local_static_file = File.join(Chef::Config[:file_cache_path], node[:ziggrid][:static][:filename])
 local_config_file = "#{File.join(Chef::Config[:file_cache_path], node[:ziggrid][:role])}.config"
 local_data_file = File.join(Chef::Config[:file_cache_path], node[:ziggrid][:data][:filename])
 
-#ziggrid prod
-s3_file local_prod_file do
-  remote_path File.join(node[:ziggrid][:prod][:prefix], node[:ziggrid][:prod][:filename])
-  bucket node[:ziggrid][:prod][:bucket]
-  aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
-  aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
-  owner node[:ziggrid][:user]
-  group node[:ziggrid][:group]
-  mode "0755"
-  action :create
+if use_public_release
+  #ziggrid prod
+  remote_file local_prod_file do
+    source "#{File.join(node[:ziggrid][:public][:base_url], node[:ziggrid][:prod][:bucket], node[:ziggrid][:prod][:prefix], node[:ziggrid][:prod][:filename])}"
+    owner node[:ziggrid][:user]
+    group node[:ziggrid][:group]
+    mode "0755"
+    action :create
+  end
+
+  #ziggrid static
+  remote_file local_static_file do
+    source "#{File.join(node[:ziggrid][:public][:base_url], node[:ziggrid][:static][:bucket], node[:ziggrid][:static][:filename])}"
+    owner node[:ziggrid][:user]
+    group node[:ziggrid][:group]
+    mode "0755"
+    action :create
+  end
+
+  #download baseballData.zip
+  remote_file local_data_file do
+    source "#{File.join(node[:ziggrid][:public][:base_url], node[:ziggrid][:data][:bucket], node[:ziggrid][:data][:filename])}"
+    owner node[:ziggrid][:user]
+    group node[:ziggrid][:group]
+    mode "0755"
+    action :create
+  end  
+else
+  #ziggrid prod
+  s3_file local_prod_file do
+    remote_path File.join(node[:ziggrid][:prod][:prefix], node[:ziggrid][:prod][:filename])
+    bucket node[:ziggrid][:prod][:bucket]
+    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
+    owner node[:ziggrid][:user]
+    group node[:ziggrid][:group]
+    mode "0755"
+    action :create
+  end
+
+  #ziggrid static
+  s3_file local_static_file do
+    remote_path "/#{node[:ziggrid][:static][:filename]}"
+    bucket node[:ziggrid][:static][:bucket]
+    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
+    owner node[:ziggrid][:user]
+    group node[:ziggrid][:group]
+    mode "0755"
+    action :create
+  end
+
+  #download baseballData.zip
+  s3_file local_data_file do
+    remote_path "/#{node[:ziggrid][:data][:filename]}"
+    bucket node[:ziggrid][:data][:bucket]
+    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
+    owner node[:ziggrid][:user]
+    group node[:ziggrid][:group]
+    mode "0755"
+    action :create
+  end
 end
 
-#ziggrid static
-s3_file local_static_file do
-  remote_path "/#{node[:ziggrid][:static][:filename]}"
-  bucket node[:ziggrid][:static][:bucket]
-  aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
-  aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
-  owner node[:ziggrid][:user]
-  group node[:ziggrid][:group]
-  mode "0755"
-  action :create
-end
 
-#download baseballData.zip
-s3_file local_data_file do
-  remote_path "/#{node[:ziggrid][:data][:filename]}"
-  bucket node[:ziggrid][:data][:bucket]
-  aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
-  aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
-  owner node[:ziggrid][:user]
-  group node[:ziggrid][:group]
-  mode "0755"
-  action :create
-end
 
 deployDir = node[:ziggrid][:deploy_dir]
 workingDir = "#{deployDir}"
@@ -134,15 +171,25 @@ node[:ziggrid][:config_zip_list].each do |config_zip|
   
   config_zip_full_path = File.join(Chef::Config[:file_cache_path], config_zip)
 
-  s3_file config_zip_full_path do
-    remote_path "/#{config_zip}"
-    bucket node[:ziggrid][:static][:bucket]
-    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
-    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
-    owner node[:ziggrid][:user]
-    group node[:ziggrid][:group]
-    mode "0755"
-    action :create
+  if use_public_release
+    remote_file config_zip_full_path do
+      source "#{File.join(node[:ziggrid][:public][:base_url], node[:ziggrid][:static][:bucket], config_zip)}"
+      owner node[:ziggrid][:user]
+      group node[:ziggrid][:group]
+      mode "0755"
+      action :create
+    end
+  else
+    s3_file config_zip_full_path do
+      remote_path "/#{config_zip}"
+      bucket node[:ziggrid][:static][:bucket]
+      aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+      aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
+      owner node[:ziggrid][:user]
+      group node[:ziggrid][:group]
+      mode "0755"
+      action :create
+    end
   end
 
   execute "extract #{config_zip_full_path}" do
@@ -174,7 +221,7 @@ template File.join(deployDir, "config", "ziggrid-baseball.xml") do
   group node[:ziggrid][:group]
   mode 0644
   variables({
-    :couchUrl         => node[:zinikicouch][:trailblazer][:is_elastic_ip] ? "http://#{node[:zinikicouch][:trailblazer][:domain_name]}:8091/" : node.run_state['couchbaseMainUrl'],
+    #:couchUrl         => node[:zinikicouch][:trailblazer][:is_elastic_ip] ? "http://#{node[:zinikicouch][:trailblazer][:domain_name]}:8091/" : node.run_state['couchbaseMainUrl'],
     :couchBucket      => node[:ziggrid][:bucket_name],
     :dataDirectory    => File.join(deployDir, "data")
   })
@@ -194,27 +241,39 @@ if (node[:ziggrid][:data][:datastore] == "couchbase")
   couchbase_url=node[:zinikicouch][:trailblazer][:is_elastic_ip] ? "http://#{node[:zinikicouch][:trailblazer][:domain_name]}:8091/" : node.run_state['couchbaseMainUrl'],
   storage_options="--storage couchbase #{couchbase_url}"
 elsif (node[:ziggrid][:data][:datastore] == "foundationdb")
-  storage_options="--storage foundation #{clearDBString} --cluster /opt/ziggrid/config/fdb.cluster"
-
-  include_recipe "foundationdb::client"
-
-  #set up fdb config file
-  s3_file local_config_file do
-    remote_path "/#{node[:ziggrid][:prefix]}/#{node[:ziggrid][:role]}.config"
-    bucket node[:ziggrid][:bucket]
-    aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
-    aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
-    owner node[:ziggrid][:user]
-    group node[:ziggrid][:group]
-    mode "0755"
-    action :create
-  end
-
+  
   clearDBString = ""
   if (node[:ziggrid][:data][:clearDB])
     clearDBString = "--clearDB"
    end
  
+  storage_options="--storage foundation #{clearDBString} --cluster /opt/ziggrid/config/fdb.cluster"
+
+  include_recipe "foundationdb::client"
+
+  if use_public_release
+    remote_file local_config_file do
+      source "#{File.join(node[:ziggrid][:public][:base_url], node[:ziggrid][:bucket], node[:ziggrid][:prefix], node[:ziggrid][:role])}.config"
+      owner node[:ziggrid][:user]
+      group node[:ziggrid][:group]
+      mode "0755"
+      action :create
+    end
+  else
+    #set up node configuration file
+    s3_file local_config_file do
+      remote_path "/#{node[:ziggrid][:prefix]}/#{node[:ziggrid][:role]}.config"
+      bucket node[:ziggrid][:bucket]
+      aws_access_key_id node[:ziggrid][:cloud][:aws][:access_key]
+      aws_secret_access_key node[:ziggrid][:cloud][:aws][:secret_key]
+      owner node[:ziggrid][:user]
+      group node[:ziggrid][:group]
+      mode "0755"
+      action :create
+    end
+  end
+
+  
 end
 
 #set up command line
