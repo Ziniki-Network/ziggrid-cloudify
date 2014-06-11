@@ -1,0 +1,181 @@
+#!/bin/bash
+
+colorcode()
+{
+	color_red=$1
+	color_green=$2
+	color_blue=$3
+	color_code=$(( 36 * ${color_red} + 6 * ${color_green} + ${color_blue} + 16 ))
+	echo ${color_code}
+}
+
+echorainbow()
+{
+	string=$1
+	color_count=22
+	echo_options_l=$2
+
+
+	length=${#string}
+
+	if [ $length -ge $color_count ]; then
+		pieces=$(( ${length} / ${color_count} ))
+		remainder=$(( ${length} - ${pieces} * ${color_count} ))
+		#echo "pieces is ${pieces}, remainder is ${remainder}"
+		excess_remainder=${remainder}
+	else
+		steps_per_letter=$(( ${color_count} / ${length}))
+		step_remainder=$(( ${color_count} - ${steps_per_letter} * ${length} ))
+		excess_steps=${step_remainder}
+		#echo "Less than $color_count letters, length $length, $steps_per_letter steps per letter, remainder $step_remainder"
+	fi
+
+	index=0
+	skip=0
+
+	for color in 196 202 208 214 220 226 190 154 118 82 46 47 48 49 50 51 45 39 33 27 21 57
+	do
+		#echo "color $color"
+		if [ $length -ge $color_count ]; then
+			printing=${pieces}
+			if [ ${excess_remainder} -gt 0 ]; then
+				printing=$(( ${pieces} + 1 ))
+				excess_remainder=$(( ${excess_remainder} - 1 ))
+			fi 
+			echocolor -n $color "${string:$index:$printing}"
+			index=$(( ${index} + ${printing} ))
+		else
+			if [ $skip -eq 0 ]; then
+				#echo "printing $color"
+				echocolor -n $color "${string:$index:1}"
+				index=$(( ${index} + 1 ))
+				if [ $excess_steps -gt 0 ]; then
+					skip=$(( ${steps_per_letter} ))
+					excess_steps=$(( ${excess_steps} - 1 ))
+				else
+					skip=$(( ${steps_per_letter} - 1 ))
+				fi
+			else
+				#echo "skipping $color"
+				skip=$(( ${skip} - 1 ))
+				continue
+			fi 
+		fi
+
+	done
+	echo "${echo_options_l}" ""
+}
+
+
+echocolor()
+{
+	#echo "Teamcity set to ${FLAGS_teamcity}"	
+	echo_options=""
+	if [ "$1" == "-n" ]
+	then
+		echo_options="-n"
+		shift
+	fi
+
+	if [ $# -eq 2 ] ; then
+		color="$1"
+		text="$2"
+		if [ -z "${FLAGS_teamcity}" ] || [ ${FLAGS_teamcity} -eq ${FLAGS_FALSE} ]
+		then
+			if [ "$color" = "rainbow" ]
+			then
+				#echo "Text is \"${text}\" echo options is ${echo_options}"
+				echorainbow "${text}" "${echo_options}"	
+			else
+				case "$color" in
+				red)  
+					tput setaf 1  
+				    ;;
+				green)
+					tput setaf 2  
+				    ;;
+				yellow)
+					tput setaf 3  
+				    ;;
+				blue)
+					tput setaf 4  
+				    ;;
+				violet|purple)
+					tput setaf 5  
+				    ;;
+				cyan)
+					tput setaf 6  
+				    ;;
+				white)
+					tput setaf 7  
+				    ;;
+				*)
+					tput setaf $color
+					;;
+				esac
+				echo ${echo_options} "${text}"
+				tput sgr0
+			fi
+			
+		fi
+		
+	elif [ $# -eq 4 ] ; then
+		color_red=$1
+		color_green=$2
+		color_blue=$3
+		text=$4
+		color_code=$(( 36 * ${color_red} + 6 * ${color_green} + ${color_blue} + 16 ))
+		tput setaf ${color_code}
+		echo ${echo_options} "${text}"
+		tput sgr0
+	fi
+	
+	
+}
+
+colorstring()
+{
+	inputString=$1
+	word=$2
+	color=$3
+	wholeline=$4
+
+	colorOption=""
+	resetColor="tput sgr0"
+
+	if [ -z "${FLAGS_teamcity}" ] || [ ${FLAGS_teamcity} -eq ${FLAGS_FALSE} ]
+	then
+		case "$color" in
+		red)  
+			colorOption="tput setaf 1"  
+		    ;;
+		green)
+			colorOption="tput setaf 2"  
+		    ;;
+		yellow)
+			colorOption="tput setaf 3"  
+		    ;;
+		blue)
+			colorOption="tput setaf 4"  
+		    ;;
+		violet|purple)
+			colorOption="tput setaf 5"  
+		    ;;
+		cyan)
+			colorOption="tput setaf 6"  
+		    ;;
+		white)
+			colorOption="tput setaf 7"  
+		    ;;
+		brightred)
+			colorOption="tput setaf 196"  
+		    ;;
+		esac
+	fi
+
+	if [ "${wholeline}" = "--wholeline" ] ; then
+		echo "${inputString}" | sed -e "s/\(^.*${word}.*$\)/$(${colorOption})\1$(${resetColor})/"
+	else
+		echo "${inputString}" | sed -e "s/\(${word}\)/$(${colorOption})\1$(${resetColor})/"
+	fi
+}
