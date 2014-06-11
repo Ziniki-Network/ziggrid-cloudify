@@ -1,0 +1,66 @@
+{
+  "name": "ziggrid",
+  "override_attributes": {
+    "foundationdb": {
+      "user": "ziggrid",
+      "group": "ziggrid",
+      "config_dir": "/opt/ziggrid/config"
+    },
+    "logstash": {
+      "agent": {
+        "inputs": [
+          {
+            "file": {
+              "type": "ziggrid",
+              "path": [
+                "/opt/ziggrid/logs/ziggrid*.log"
+              ],
+              "debug": "true",
+              "start_position": "beginning"
+            }
+          }
+        ],
+        "filters": [
+          {
+            "grok": {
+              "match": [
+                "message",
+                "(?<logdatestamp>\\d{8}-\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d)\\s+(?<logger>\\S{1,18})\\/(?<thread>..)\\s%{WORD:logLevel}:\\s%{GREEDYDATA:logMessage}"
+              ],
+              "add_field": [
+                "logdtstamp",
+                "%{logdatestamp}"
+              ],
+              "type": "ziggrid",
+              "singles": "true"
+            }
+          },
+          {
+            "multiline": {
+              "negate": "true",
+              "pattern": "^\\d\\d\\d\\d\\d\\d\\d\\d-\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d",
+              "type": "ziggrid",
+              "what": "previous"
+            }
+          },
+          {
+            "mutate": {
+              "join": [
+                "logdtstamp",
+                ""
+              ],
+              "gsub": [
+                "logdtstamp",
+                "[-:.]",
+                ""
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "run_list": [
+    "recipe[ziggrid]"
+  ]
+}

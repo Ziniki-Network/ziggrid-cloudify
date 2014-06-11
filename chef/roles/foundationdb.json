@@ -1,0 +1,7 @@
+{
+  "name": "foundationdb",
+  "description": "Role for the creation of a Foundation DB cluster",
+  "run_list": [
+    "recipe[foundationdb::server]"
+  ]
+}

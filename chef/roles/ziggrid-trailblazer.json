@@ -1,0 +1,10 @@
+{
+  "name": "ziggrid-trailblazer",
+  "override_attributes": {
+    "ziggrid": {
+      "data": {
+        "clearDB": false
+      }
+    }
+  }
+}
