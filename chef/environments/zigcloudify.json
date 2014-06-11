@@ -7,7 +7,7 @@
       "use_graphite": false,
       "use_logstash": false,
       "prod": {
-        "filename": "20140510-ziggrid.zip"
+        "filename": "20140610-ziggrid.zip"
       },
       "debug": false
     },
